@@ -1,19 +1,12 @@
 var keythereum = require('keythereum');
 var join = require('path').join;
 var assert = require('chai').assert;
-var geth = require('geth');
+var path = require('path');
 var fs = require('fs');
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 var DATADIR = join(__dirname, "fixtures/keystore");
-
-var options = {
-    persist: false,
-    flags: {
-        datadir: DATADIR,
-        ipcpath: join(DATADIR, "geth.ipc"),
-        password: join(DATADIR, ".password")
-    }
-};
+var addr = "d100e081fd5e8a1156d9e871417f1ac3fe22e6ed";
 
 function createKey(passphrase){
     var dk = keythereum.create();
@@ -39,30 +32,29 @@ function createAccount(password){
     return json
 }
 
-function checkKeyExistence(address) {
-    var fso = new ActiveXObject('Scripting.FileSystemObject');
-    if (fso.FolderExists(DATADIR)) {
-
-    }
-}
-
-function findKeyfile(keystore, address, files) {
+function findKeyfile(address) {
     address = address.replace("0x", "");
     address = address.toLowerCase();
-    var i, len, filepath = null;
+    var i, len, file_path = null;
+    var files = fs.readdirSync(DATADIR);
+    // var reader = new FileReader();
+
     for (i = 0, len = files.length; i < len; ++i) {
         if (files[i].indexOf(address) > -1) {
-            filepath = path.join(keystore, files[i]);
-            if (fs.lstatSync(filepath).isDirectory()) {
-                filepath = path.join(filepath, files[i]);
-                console.log(filepath)
+            file_path = path.join(DATADIR, files[i]);
+            if (fs.lstatSync(file_path).isDirectory()) {
+                file_path = path.join(file_path, files[i]);
             }
             break;
         }
     }
-    return filepath;
+
+    return JSON.parse(fs.readFileSync(file_path));
 }
-var addr = "0xd100e081fd5e8a1156d9e871417f1ac3fe22e6ed"
-// ad = findKeyfile(DATADIR ,addr, fs.readdirSync(DATADIR));
-ca = createAccount('password');
-console.log(ca);
+
+
+
+ad = findKeyfile(addr);
+console.log(ad)
+
+
